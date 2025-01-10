@@ -1,27 +1,40 @@
 import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
-// import { createClient } from 'redis';
-// import dotenv from 'dotenv'; 
+import { createClient } from 'redis'; // v4 이상에서 사용
+import dotenv from 'dotenv'; 
 import { instrument } from '@socket.io/admin-ui';
 
-// dotenv.config();
+dotenv.config();
 
-// DB 연결 관련 코드
-// const client = createClient({
-//   socket: {
-//     host: process.env.REDIS_HOST,
-//     port: Number(process.env.REDIS_PORT),
-//   }
-// });
+// Redis 연결 관련 코드
+const redisClient = createClient({
+  socket: {
+    host: process.env.REDIS_HOST,
+    port: Number(process.env.REDIS_PORT),
+  }
+});
 
-// client.on('connect', () => {
-//   console.log('Redis client connected');
-// });
+redisClient.connect().catch((err) => {
+  console.error('Redis 연결 중 오류 발생:', err);
+});
 
-// client.on('error', (err) => {
-//   console.log('Something went wrong ' + err);
-// });
+
+redisClient.on('connect', () => {
+  console.log('Redis client connected');
+});
+
+redisClient.on('error', (err) => {
+  console.log('Something went wrong ' + err);
+});
+
+redisClient.subscribe('room-channel', (err, count) => {
+  if (err) {
+    console.error('Failed to subscribe: ', err);
+  } else {
+    console.log(`Subscribed successfully! This client is currently subscribed to ${count} channels.`);
+  }
+});
 
 // 서버 생성 및 Socket.io 연결
 const app = express();
