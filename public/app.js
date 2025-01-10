@@ -176,4 +176,6 @@ function handleIce(data)  {
 function handleAddStream(data) {
   const peersFace = document.getElementById('peersFace');
   peersFace.srcObject = data.stream; 
+  console.log("Peer's Stream ", data.stream);
+  console.log("My Stream ", myStream);
 }

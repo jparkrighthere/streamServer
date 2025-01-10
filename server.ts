@@ -1,13 +1,13 @@
 import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
-// import { createClient } from 'redis'; // Redis는 주석 처리됨
-// import dotenv from 'dotenv'; // dotenv는 주석 처리됨
+// import { createClient } from 'redis';
+// import dotenv from 'dotenv'; 
 import { instrument } from '@socket.io/admin-ui';
 
-// dotenv.config(); // 환경 설정 파일 로딩
+// dotenv.config();
 
-// DB 연결 관련 코드 (필요하면 활성화 가능)
+// DB 연결 관련 코드
 // const client = createClient({
 //   socket: {
 //     host: process.env.REDIS_HOST,
@@ -27,10 +27,12 @@ import { instrument } from '@socket.io/admin-ui';
 const app = express();
 const server = http.createServer(app);
 
+// 서버 객체 생성
 const io = new Server(server, {
   cors: { origin: '*' },
 });
 
+// Socket.io Admin UI 활성화
 instrument(io, {
   auth: false
 });
@@ -55,7 +57,7 @@ io.on('connection', (socket) => {
   });
   socket.on('ice', (ice, roomName) => {
     socket.to(roomName).emit('ice', ice);
-  });
+   });
 });
 
 server.listen(3000, () => {
