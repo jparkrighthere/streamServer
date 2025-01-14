@@ -65,26 +65,10 @@ redisClient.connect()
       const roomName = channel.split(':')[1];
       const userName = message;
 
+      //TODO: 실제로 생성이 되었는지 확인을 해봐야함
       io.emit('join_room', roomName, userName); 
     });
   })
   .catch((err) => {
     console.error('Redis connection failed:', err);
   });
-
-  // function createOrJoinRoom(roomName: string, userName : string) {
-  //   // Redis에서 해당 roomName에 대한 정보가 있는지 확인 (예: 방의 존재 여부)
-  //   redisClient.get(`room:${roomName}`).then((roomData) => {
-  //     if (!roomData) {
-  //       // 방이 없다면 새로운 방 생성 (예: 방 데이터 저장)
-  //       console.log(`Creating room: ${roomName}`);
-  //       redisClient.set(`room:${roomName}`, 'created');  // 간단한 방 생성 예시
-  //     }
-  
-  //     // 방에 유저를 참가시키는 로직
-  //     // 예시: room에 참가하는 이벤트 발생
-  //     io.emit('join_room', roomName, userName);  // 방에 참가하는 Socket.IO 이벤트
-  //   }).catch((err) => {
-  //     console.error('Error creating or joining room:', err);
-  //   });
-  // }
