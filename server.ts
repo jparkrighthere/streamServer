@@ -1,67 +1,44 @@
 import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
-import { WebSocketServer } from 'ws';
+import { instrument } from '@socket.io/admin-ui';
 
+// 서버 생성 및 Socket.io 연결
 const app = express();
 const server = http.createServer(app);
 
-// WebSocket server (direct connection with Spring)
-const wss = new WebSocketServer({ server });
-
-wss.on('connection', (ws) => {
-  console.log('Connected to Spring WebSocket server.');
-
-  ws.on('message', (message) => {
-    console.log('Received message from Spring:', message.toString());
-  });
-
-  ws.on('close', () => {
-    console.log('Connection with Spring WebSocket server closed.');
-  });
-});
-
-// Socket.IO server (connection with client)
+// 서버 객체 생성
 const io = new Server(server, {
   cors: { origin: '*' },
 });
 
-io.on('connection', (socket) => {
-  console.log('Connected to Socket.IO client.');
+// Socket.io Admin UI 활성화
+instrument(io, {
+  auth: false
+});
 
-  socket.on('message', (message) => {
-    console.log('Received message from client:', message);
-    const [userName, roomId] = parseMessage(message);
-    if (roomId) {
-      handleRoomCreation(socket, roomId, userName);
-    }
+io.on('connection', (socket) => {
+  socket.on('join_room', (roomName, userName) => {
+    // 클라이언트를 특정 방에 참가시킴
+    socket.join(roomName);
+    // 해당 방에 있는 다른 클라이언트들에게 환영 메시지 전송
+    socket.to(roomName).emit('welcome', `${userName} has joined the room`);
   });
 
-  socket.on('disconnect', () => {
-    console.log('Socket.IO client disconnected.');
+  socket.on('offer', (offer, roomName) => {
+    socket.to(roomName).emit('offer', offer);
+  });
+
+  socket.on('answer', (answer, roomName) => {
+    socket.to(roomName).emit('answer', answer);
+  });
+
+  socket.on('ice', (ice, roomName) => {
+    socket.to(roomName).emit('ice', ice);
   });
 });
 
-// Message parsing
-function parseMessage(message : any) {
-  const parts = message.split(',');
-  const userName = parts[0];
-  const roomId = parts[1];
-  return [userName, roomId];
-}
-
-// Room creation/participation handling
-function handleRoomCreation(socket : any, roomId : any, userName : any) {
-  const socketsInRoom = io.sockets.adapter.rooms.get(roomId);
-
-  if (!socketsInRoom) {
-    socket.join(roomId);
-    io.to(roomId).emit('welcome', `${userName} has created room ${roomId}`);
-  } else {
-    io.to(roomId).emit('welcome', `${userName} has joined room ${roomId}`);
-  }
-}
-
+// 서버 실행
 server.listen(3000, () => {
-  console.log('Node.js server is running on port 3000');
+  console.log('Server is running on http://localhost:3000');
 });
