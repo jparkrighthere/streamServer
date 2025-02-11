@@ -2,6 +2,7 @@ import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import { instrument } from '@socket.io/admin-ui';
+import mediasoup from 'mediasoup';
 
 // 서버 생성 및 Socket.io 연결
 const app = express();
@@ -16,6 +17,47 @@ const io = new Server(server, {
 instrument(io, {
   auth: false
 });
+
+let worker;
+let rooms = {};
+let peers = {};
+let transports = [];
+let producers = []; 
+let consumers = [];
+
+const createWorker = async () => {
+  worker = await mediasoup.createWorker({
+    rtcMinPort: 2000,
+    rtcMaxPort: 2100,
+  });
+  console.log(`worker pid=${worker.pid}`);
+
+  // mediasoup 내장 함수. worker process 가 예상치 않게 끊겼을 때 'died' 이벤트가 emit
+  worker.on('died', error => {
+    console.error('mediasoup worker died:', error);
+    setTimeout(() => process.exit(1), 2000);
+  });
+  return worker;
+}
+
+worker = createWorker();
+
+const mediaCodecs = [
+  {
+    kind: 'audio',
+    mimeType: 'audio/opus',
+    clockRate: 48000,
+    channels: 2,
+  },
+  {
+    kind: 'video',
+    mimeType: 'video/VP8',
+    clockRate: 90000,
+    parameters: {
+      'x-google-start-bitrate': 1000,
+    },
+  },
+];
 
 io.on('connection', (socket) => {
   socket.on('join_room', (roomName, userName) => {
