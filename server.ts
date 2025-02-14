@@ -314,5 +314,5 @@ io.on('connection', (socket) => {
 
 server.listen(3000, async () => {
     await initMediasoup();
-    console.log('🚀 SFU Server running on http://localhost:3000');
+    console.log('Server running on http://localhost:3000');
 });
