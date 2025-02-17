@@ -11,7 +11,6 @@ RUN npm run build
 
 COPY index.html ./dist
 COPY public ./dist/public
-COPY .env ./dist
 
 WORKDIR ./dist
 
