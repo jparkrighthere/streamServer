@@ -1,32 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Noom</title>
-</head>
-<body>
-    <header>
-        <h1>Noom</h1>
-    </header>
-    <main>
-        <div id = "welcome">
-            <form>
-                <input id="roomName" name="roomName" placeholder="Room Name" required type="text">
-                <button type="submit">Enter Room</button>
-            </form>
-        </div>
-        <div id = "call">
-            <div id="myStream">
-                <video id="myFace" autoplay playsinline width="400" height="400"></video>
-                <button id="mute">Mute</button>
-                <button id="camera">Turn Camera Off</button>
-                <select id="cameras"></select>
-                <video id="peersFace" autoplay playsinline width="400" height="400"></video>
-            </div>
-        </div>
-    </main>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/app.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mediasoup SFU Client</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
