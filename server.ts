@@ -190,6 +190,16 @@ io.on("connection", (socket: Socket) => {
       if (rooms[roomId].peers.length === 0) delete rooms[roomId];
     }
   });
+
+  // Add chat message handling
+  socket.on("chat-message", ({ roomId, message, username }: { roomId: string; message: string; username: string }) => {
+    // Broadcast the message to all peers in the room
+    io.to(roomId).emit("chat-message", {
+      message,
+      username,
+      timestamp: new Date().toISOString(),
+    });
+  });
 });
 
 console.log("🚀 Node.js Mediasoup SFU Socket server running on port 4000");
