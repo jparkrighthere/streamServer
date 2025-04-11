@@ -1,16 +1,20 @@
 networks:
   shared-network:
-    external: true
+    driver: bridge
 
 services:
   node-app:
     image: node-app
     container_name: node-app
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "4000:4000"
     networks:
       - shared-network
-
+      
   # nginx-stream:
   #   image: nginx:latest
   #   container_name: nginx-stream

@@ -11,6 +11,6 @@
     "outDir": "./dist",
   },
   // "include": ["src/**/*.ts"],
-  "include": ["server.ts"],
+  "include": ["server.ts", "src/**/*.ts"],
   "exclude": ["node_modules"]
 }

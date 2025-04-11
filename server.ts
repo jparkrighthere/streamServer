@@ -13,21 +13,32 @@ interface Room {
   recvTransports: { [socketId: string]: mediasoup.types.WebRtcTransport[] }; // 배열로 변경
 }
 
-let workers: mediasoup.types.Worker[] = [];
 let rooms: { [roomId: string]: Room } = {};
+let worker: mediasoup.types.Worker;
 
-(async () => {
-  console.log("Creating Mediasoup workers...");
-  for (let i = 0; i < 2; i++) {
-    workers.push(await createWorker());
-  }
-})();
+const createWorker = async () => {
+  worker = await mediasoup.createWorker({
+    rtcMinPort: 2000,
+    rtcMaxPort: 2100,
+  })
+  console.log(`worker pid ${worker.pid}`)
 
-async function createWorker(): Promise<mediasoup.types.Worker> {
-  const worker = await mediasoup.createWorker();
-  console.log("Worker created");
+  // mediasoup 내장 함수. worker process 가 예상치 않게 끊겼을 때 'died' 이벤트가 emit된다
+  worker.on('died', error => {
+    // This implies something serious happened, so kill the application
+    console.error('mediasoup worker has died')
+    setTimeout(() => process.exit(1), 2000) // exit in 2 seconds
+  })
+
+  return worker
+}
+
+const initWorker = async () => {
+  worker = await createWorker();
   return worker;
 }
+
+initWorker();
 
 const createWebRtcTransport = (
   router: mediasoup.types.Router,
@@ -55,7 +66,7 @@ io.on("connection", (socket: Socket) => {
 
   socket.on("join-room", async ({ roomId }: { roomId: string }) => {
     if (!rooms[roomId]) {
-      const router = await workers[0].createRouter({
+      const router = await worker.createRouter({
         mediaCodecs: [
           { kind: "audio", mimeType: "audio/opus", clockRate: 48000, channels: 2 },
           { kind: "video", mimeType: "video/VP8", clockRate: 90000 },
